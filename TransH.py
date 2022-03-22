@@ -36,13 +36,13 @@ class BaseTransH(TranslationModel):
         xavier_uniform_(self.rel_embeddings.weight.data)
 
         self.normalize_parameters()
-        self.rel_embeddings.weight.data = F.normalize(self.rel_embeddings.weight.data, p=2, dim=1)
 
         self.evaluated_projections = False
         self.projected_entities = nn.Parameter(torch.empty(size=(num_relations, num_entities, self.dim)), requires_grad=False)
 
     def normalize_parameters(self):
         self.ent_embeddings.weight.data = F.normalize(self.ent_embeddings.weight.data, p=2, dim=1)
+        self.rel_embeddings.weight.data = F.normalize(self.rel_embeddings.weight.data, p=2, dim=1)
         self.norm_vect.weight.data = F.normalize(self.norm_vect.weight.data, p=2, dim=1)
 
     def get_embeddings(self):
@@ -62,7 +62,7 @@ class BaseTransH(TranslationModel):
     def lp_evaluate_projections(self):
         if self.evaluated_projections:
             return
-        for i in tqdm(range(self.n_ent), unit='entities', desc='Projecting entities'):
+        for i in tqdm(range(self.num_entities), unit='entities', desc='Projecting entities'):
             norm_vect = self.norm_vect.weight.data.view(self.num_relations, self.dim)
             mask = torch.tensor([i], device=norm_vect.device).long()
             if norm_vect.is_cuda:
